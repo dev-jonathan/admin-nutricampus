@@ -1,0 +1,224 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar class="mb-4 gap-2">
+  <ng-template pTemplate="left">
+    <button
+      pButton
+      pRipple
+      label="Novo Prato"
+      icon="pi pi-plus"
+      class="p-button-success mr-2"
+      (click)="openNew()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Deletar"
+      icon="pi pi-trash"
+      class="p-button-danger"
+      (click)="deleteSelectedPratos()"
+      [disabled]="!selectedPratos || !selectedPratos.length"
+    ></button>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="pratos"
+  dataKey="id_prato"
+  [(selection)]="selectedPratos"
+  [rows]="10"
+  [paginator]="true"
+  [globalFilterFields]="['nome_prato', 'link_receita']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [rowHover]="true"
+  [rowExpandMode]="'single'"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th style="width: 3rem"></th>
+      <th pSortableColumn="nome_prato">
+        Nome do Prato <p-sortIcon field="nome_prato"></p-sortIcon>
+      </th>
+      <th pSortableColumn="link_receita">
+        Link da Receita <p-sortIcon field="link_receita"></p-sortIcon>
+      </th>
+      <th>Ações</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-prato let-expanded="expanded">
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="prato"></p-tableCheckbox>
+      </td>
+      <td>
+        <button
+          type="button"
+          pButton
+          pRipple
+          [pRowToggler]="prato"
+          class="p-button-text p-button-rounded p-button-plain"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+        ></button>
+      </td>
+      <td>{{ prato.nome_prato }}</td>
+      <td>
+        <a [href]="prato.link_receita" target="_blank">{{
+          prato.link_receita
+        }}</a>
+      </td>
+      <td>
+        <button
+          pButton
+          icon="pi pi-pencil"
+          class="p-button-rounded p-button-info"
+          (click)="editPrato(prato)"
+        ></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="rowexpansion" let-prato>
+    <tr>
+      <td colspan="5">
+        <div class="p-3">
+          <p-table
+            [value]="prato.ingredientes"
+            dataKey="id_ingrediente"
+            [tableStyle]="{ 'min-width': '50rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Ingrediente</th>
+                <th style="width: 4rem">Ações</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ingrediente>
+              <tr>
+                <td>{{ ingrediente.nome_ingrediente }}</td>
+                <td>
+                  <button
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-info mr-2"
+                    (click)="editIngrediente(ingrediente, prato)"
+                  ></button>
+                  <button
+                    pButton
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-warning"
+                    (click)="deleteIngrediente(ingrediente, prato)"
+                  ></button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="2">Nenhum ingrediente encontrado.</td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <button
+            pButton
+            label="Adicionar Ingrediente"
+            icon="pi pi-plus"
+            class="mt-2"
+            (click)="openAddIngredienteDialog()"
+          ></button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Modal para editar ingrediente -->
+<p-dialog
+  header="Editar Ingrediente"
+  [(visible)]="ingredienteDialog"
+  [modal]="true"
+  [responsive]="true"
+  [style]="{ width: '450px' }"
+  [closable]="false"
+>
+  <div class="p-fluid">
+    <div class="p-field">
+      <label for="nomeIngrediente">Nome do Ingrediente</label>
+      <input
+        id="nomeIngrediente"
+        type="text"
+        pInputText
+        [(ngModel)]="selectedIngrediente.nome_ingrediente"
+        required
+      />
+    </div>
+  </div>
+  <p-footer>
+    <button
+      pButton
+      label="Salvar"
+      icon="pi pi-check"
+      (click)="saveIngrediente()"
+      [disabled]="!selectedIngrediente.nome_ingrediente"
+    ></button>
+    <button
+      pButton
+      label="Cancelar"
+      icon="pi pi-times"
+      (click)="hideIngredienteDialog()"
+      class="ui-button-secondary"
+    ></button>
+  </p-footer>
+</p-dialog>
+
+<!-- Modal para criar ou editar prato -->
+<p-dialog
+  header="{{ pratoDialogHeader }}"
+  [(visible)]="pratoDialog"
+  [modal]="true"
+  [responsive]="true"
+  [style]="{ width: '450px' }"
+  [closable]="false"
+>
+  <div class="p-fluid">
+    <div class="p-field">
+      <label for="nome">Nome do Prato</label>
+      <input
+        id="nome"
+        type="text"
+        pInputText
+        [(ngModel)]="prato.nome_prato"
+        required
+      />
+    </div>
+    <div class="p-field">
+      <label for="link">Link da Receita</label>
+      <input
+        id="link"
+        type="text"
+        pInputText
+        [(ngModel)]="prato.link_receita"
+      />
+    </div>
+  </div>
+  <p-footer>
+    <button
+      pButton
+      label="Salvar"
+      icon="pi pi-check"
+      (click)="savePrato()"
+      [disabled]="!prato.nome_prato"
+    ></button>
+    <button
+      pButton
+      label="Cancelar"
+      icon="pi pi-times"
+      (click)="hideDialog()"
+      class="ui-button-secondary"
+    ></button>
+  </p-footer>
+</p-dialog>
