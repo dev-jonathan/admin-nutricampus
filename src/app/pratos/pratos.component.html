@@ -1,140 +1,170 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<p-toolbar class="mb-4 gap-2">
+<p-toolbar class="mb-4">
   <ng-template pTemplate="left">
+    <!-- Campo de busca -->
+    <div class="search-container mb-3" style="margin-inline-end: 1rem">
+      <input
+        type="text"
+        pInputText
+        placeholder="Buscar prato..."
+        [(ngModel)]="searchText"
+        (input)="applyFilterGlobal()"
+        class="search-input"
+      />
+    </div>
+
     <button
       pButton
       pRipple
       label="Novo Prato"
       icon="pi pi-plus"
-      class="p-button-success mr-2"
+      class="p-button-success"
+      style="margin-inline-end: 1rem"
       (click)="openNew()"
     ></button>
+
     <button
       pButton
       pRipple
       label="Deletar"
       icon="pi pi-trash"
       class="p-button-danger"
-      (click)="deleteSelectedPratos()"
       [disabled]="!selectedPratos || !selectedPratos.length"
+      (click)="deleteSelectedPratos()"
     ></button>
   </ng-template>
 </p-toolbar>
 
-<p-table
-  #dt
-  [value]="pratos"
-  dataKey="id_prato"
-  [(selection)]="selectedPratos"
-  [rows]="10"
-  [paginator]="true"
-  [globalFilterFields]="['nome_prato', 'link_receita']"
-  [tableStyle]="{ 'min-width': '75rem' }"
-  [rowHover]="true"
-  [rowExpandMode]="'single'"
->
-  <ng-template pTemplate="header">
-    <tr>
-      <th style="width: 4rem">
-        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-      </th>
-      <th style="width: 3rem"></th>
-      <th pSortableColumn="nome_prato">
-        Nome do Prato <p-sortIcon field="nome_prato"></p-sortIcon>
-      </th>
-      <th pSortableColumn="link_receita">
-        Link da Receita <p-sortIcon field="link_receita"></p-sortIcon>
-      </th>
-      <th>Ações</th>
-    </tr>
-  </ng-template>
+<div class="table-responsive">
+  <p-table
+    #dt
+    [value]="pratos"
+    dataKey="id_prato"
+    [(selection)]="selectedPratos"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['nome_prato', 'link_receita']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    [rowExpandMode]="'single'"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th style="width: 3rem"></th>
+        <th pSortableColumn="nome_prato">
+          Nome do Prato <p-sortIcon field="nome_prato"></p-sortIcon>
+        </th>
+        <th pSortableColumn="link_receita">
+          Link da Receita <p-sortIcon field="link_receita"></p-sortIcon>
+        </th>
+        <th>Editar Prato</th>
+      </tr>
+    </ng-template>
 
-  <ng-template pTemplate="body" let-prato let-expanded="expanded">
-    <tr>
-      <td>
-        <p-tableCheckbox [value]="prato"></p-tableCheckbox>
-      </td>
-      <td>
-        <button
-          type="button"
-          pButton
-          pRipple
-          [pRowToggler]="prato"
-          class="p-button-text p-button-rounded p-button-plain"
-          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
-        ></button>
-      </td>
-      <td>{{ prato.nome_prato }}</td>
-      <td>
-        <a [href]="prato.link_receita" target="_blank">{{
-          prato.link_receita
-        }}</a>
-      </td>
-      <td>
-        <button
-          pButton
-          icon="pi pi-pencil"
-          class="p-button-rounded p-button-info"
-          (click)="editPrato(prato)"
-        ></button>
-      </td>
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="rowexpansion" let-prato>
-    <tr>
-      <td colspan="5">
-        <div class="p-3">
-          <p-table
-            [value]="prato.ingredientes"
-            dataKey="id_ingrediente"
-            [tableStyle]="{ 'min-width': '50rem' }"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Ingrediente</th>
-                <th style="width: 4rem">Ações</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-ingrediente>
-              <tr>
-                <td>{{ ingrediente.nome_ingrediente }}</td>
-                <td>
-                  <button
-                    pButton
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-info mr-2"
-                    (click)="editIngrediente(ingrediente, prato)"
-                  ></button>
-                  <button
-                    pButton
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-warning"
-                    (click)="deleteIngrediente(ingrediente, prato)"
-                  ></button>
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="2">Nenhum ingrediente encontrado.</td>
-              </tr>
-            </ng-template>
-          </p-table>
+    <ng-template pTemplate="body" let-prato let-expanded="expanded">
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="prato"></p-tableCheckbox>
+        </td>
+        <td>
+          <button
+            type="button"
+            pButton
+            pRipple
+            [pRowToggler]="prato"
+            class="p-button-text p-button-rounded p-button-plain"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          ></button>
+        </td>
+        <td>{{ prato.nome_prato }}</td>
+        <td>
+          <a [href]="prato.link_receita" target="_blank">{{
+            prato.link_receita
+          }}</a>
+        </td>
+        <td>
           <button
             pButton
-            label="Adicionar Ingrediente"
-            icon="pi pi-plus"
-            class="mt-2"
-            (click)="openAddIngredienteDialog()"
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-info"
+            (click)="editPrato(prato)"
           ></button>
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="rowexpansion" let-prato>
+      <tr>
+        <td colspan="5">
+          <div class="p-3">
+            <div class="table-responsive">
+              <p-table
+                [value]="prato.ingredientes"
+                dataKey="id_ingrediente"
+                [tableStyle]="{ 'min-width': '50rem' }"
+              >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Ingrediente</th>
+                    <th>Quantidade Original</th>
+                    <th>Unidade Original</th>
+                    <th>A Gosto</th>
+                    <th>Quantidade Normalizada</th>
+                    <th>Unidade Normalizada</th>
+                    <th>Calorias</th>
+                    <th style="width: 4rem">Ações</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-ingrediente>
+                  <tr>
+                    <td>{{ ingrediente.nome_ingrediente }}</td>
+                    <td>{{ ingrediente.quantidade_original || "-" }}</td>
+                    <td>{{ ingrediente.unidade_original || "-" }}</td>
+                    <td>{{ ingrediente.a_gosto ? "Sim" : "Não" }}</td>
+                    <td>{{ ingrediente.quantidade_normalizada || "-" }}</td>
+                    <td>{{ ingrediente.unidade_normalizada || "-" }}</td>
+                    <td>{{ ingrediente.calorias || "-" }}</td>
+                    <td>
+                      <button
+                        pButton
+                        icon="pi pi-pencil"
+                        class="p-button-rounded p-button-info mr-2"
+                        (click)="editIngrediente(ingrediente, prato)"
+                      ></button>
+                      <button
+                        pButton
+                        icon="pi pi-trash"
+                        class="p-button-rounded p-button-warning"
+                        (click)="deleteIngrediente(ingrediente, prato)"
+                      ></button>
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="2">Nenhum ingrediente encontrado.</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+            <button
+              pButton
+              label="Adicionar Ingrediente"
+              icon="pi pi-plus"
+              class="mt-2"
+              (click)="openAddIngredienteDialog(prato)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
 
 <!-- Modal para editar ingrediente -->
 <p-dialog
@@ -154,6 +184,59 @@
         pInputText
         [(ngModel)]="selectedIngrediente.nome_ingrediente"
         required
+      />
+    </div>
+    <div class="p-field">
+      <label for="quantidadeOriginal">Quantidade Original</label>
+      <input
+        id="quantidadeOriginal"
+        type="number"
+        pInputText
+        [(ngModel)]="selectedIngrediente.quantidade_original"
+      />
+    </div>
+    <div class="p-field">
+      <label for="unidadeOriginal">Unidade Original</label>
+      <input
+        id="unidadeOriginal"
+        type="text"
+        pInputText
+        [(ngModel)]="selectedIngrediente.unidade_original"
+      />
+    </div>
+    <div class="p-field-checkbox">
+      <p-checkbox
+        inputId="aGosto"
+        [(ngModel)]="selectedIngrediente.a_gosto"
+        [binary]="true"
+      ></p-checkbox>
+      <label for="aGosto">A Gosto</label>
+    </div>
+    <div class="p-field">
+      <label for="quantidadeNormalizada">Quantidade Normalizada</label>
+      <input
+        id="quantidadeNormalizada"
+        type="number"
+        pInputText
+        [(ngModel)]="selectedIngrediente.quantidade_normalizada"
+      />
+    </div>
+    <div class="p-field">
+      <label for="unidadeNormalizada">Unidade Normalizada</label>
+      <input
+        id="unidadeNormalizada"
+        type="text"
+        pInputText
+        [(ngModel)]="selectedIngrediente.unidade_normalizada"
+      />
+    </div>
+    <div class="p-field">
+      <label for="calorias">Calorias</label>
+      <input
+        id="calorias"
+        type="number"
+        pInputText
+        [(ngModel)]="selectedIngrediente.calorias"
       />
     </div>
   </div>

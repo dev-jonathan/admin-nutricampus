@@ -1,19 +1,6 @@
-// src/app/pratos/pratos.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-// export interface Ingrediente {
-//   id_ingrediente: number;
-//   nome_ingrediente: string;
-//   a_gosto: boolean;
-//   unidade_normalizada: string;
-//   id_prato: number;
-//   quantidade_original: number;
-//   unidade_original: string;
-//   quantidade_normalizada: number;
-//   calorias: number;
-// }
 
 export interface Prato {
   id_prato?: number;
@@ -25,6 +12,12 @@ export interface Prato {
 export interface Ingrediente {
   id_ingrediente?: number;
   nome_ingrediente?: string;
+  quantidade_original?: number;
+  unidade_original?: string;
+  a_gosto?: boolean;
+  quantidade_normalizada?: number;
+  unidade_normalizada?: string;
+  calorias?: number;
   id_prato?: number;
 }
 
@@ -32,7 +25,8 @@ export interface Ingrediente {
   providedIn: 'root',
 })
 export class PratosService {
-  private apiUrl = 'https://nutricampus-api.azurewebsites.net/';
+  // private apiUrl = 'http://127.0.0.1:8000';
+  private apiUrl = 'https://nutricampus-api.azurewebsites.net';
 
   constructor(private http: HttpClient) {}
 
@@ -45,9 +39,11 @@ export class PratosService {
   }
 
   updatePrato(prato: Prato): Observable<Prato> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.put<Prato>(
       `${this.apiUrl}/pratos/${prato.id_prato}`,
       prato,
+      { headers },
     );
   }
 

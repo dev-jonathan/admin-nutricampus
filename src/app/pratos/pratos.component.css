@@ -1,0 +1,22 @@
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media screen and (max-width: 768px) {
+  .table-responsive p-table {
+    min-width: 600px;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .table-responsive .p-button {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+}

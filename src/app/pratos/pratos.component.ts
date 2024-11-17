@@ -1,8 +1,8 @@
 // @ts-ignore
-// src/app/pratos/pratos.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { PratosService, Prato, Ingrediente } from './pratos.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-pratos',
@@ -10,18 +10,24 @@ import { ConfirmationService, MessageService } from 'primeng/api';
   styleUrls: ['./pratos.component.css'],
 })
 export class PratosComponent implements OnInit {
+  @ViewChild('dt') table!: Table;
+  // Lista de pratos carregada da API
   pratos: Prato[] = [];
+  // Pratos selecionados na interface
   selectedPratos: Prato[] = [];
+  // Objeto representando o prato em edição/criação
   prato: Prato = this.initializePrato();
+  // Controle para exibir ou ocultar os modais
   pratoDialog: boolean = false;
   pratoDialogHeader: string = 'Novo Prato';
   ingredienteDialog: boolean = false;
+  // Controle do ingrediente atualmente selecionado
   selectedPrato: Prato | null = null;
-  selectedIngrediente: Ingrediente = {
-    id_ingrediente: 0,
-    nome_ingrediente: '',
-  };
+  selectedIngrediente: Ingrediente = this.initializeIngrediente();
+  // Texto de busca do usuário
+  searchText: string = '';
 
+  // Indicação de carregamento
   isLoading: boolean = false;
 
   constructor(
@@ -31,9 +37,16 @@ export class PratosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Carrega os pratos ao inicializar o componente
     this.loadPratos();
   }
 
+  // Centraliza as mensagens de feedback para o usuário
+  private showMessage(severity: string, summary: string, detail: string) {
+    this.messageService.add({ severity, summary, detail });
+  }
+
+  // Carrega a lista de pratos do backend
   loadPratos() {
     this.isLoading = true;
     this.pratosService.getPratos().subscribe(
@@ -48,6 +61,13 @@ export class PratosComponent implements OnInit {
     );
   }
 
+  applyFilterGlobal() {
+    if (this.table) {
+      this.table.filterGlobal(this.searchText, 'contains');
+    }
+  }
+
+  // Inicializa um prato vazio
   initializePrato(): Prato {
     return {
       nome_prato: '',
@@ -56,46 +76,58 @@ export class PratosComponent implements OnInit {
     };
   }
 
+  // Inicializa um ingrediente vazio
+  initializeIngrediente(): Ingrediente {
+    return {
+      id_ingrediente: undefined,
+      nome_ingrediente: '',
+      quantidade_original: undefined,
+      unidade_original: '',
+      a_gosto: false,
+      quantidade_normalizada: undefined,
+      unidade_normalizada: '',
+      calorias: undefined,
+      id_prato: undefined,
+    };
+  }
+
+  // Abre o modal para criar um novo prato
   openNew() {
     this.prato = this.initializePrato();
     this.pratoDialogHeader = 'Novo Prato';
     this.pratoDialog = true;
   }
 
+  // Fecha o modal de prato
   hideDialog() {
     this.pratoDialog = false;
   }
 
+  // Salva ou atualiza um prato
   savePrato() {
     if (this.prato.id_prato) {
       this.pratosService.updatePrato(this.prato).subscribe(() => {
         this.loadPratos();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Prato atualizado',
-        });
+        this.showMessage('success', 'Sucesso', 'Prato atualizado.');
         this.pratoDialog = false;
       });
     } else {
       this.pratosService.createPrato(this.prato).subscribe((prato) => {
         this.pratos.push(prato);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Prato criado',
-        });
+        this.showMessage('success', 'Sucesso', 'Prato criado.');
         this.pratoDialog = false;
       });
     }
   }
 
+  // Edita um prato existente
   editPrato(prato: Prato) {
     this.prato = { ...prato };
     this.pratoDialogHeader = 'Editar Prato';
     this.pratoDialog = true;
   }
 
+  // Deleta um prato existente
   deleteSelectedPratos() {
     console.log('chamada deleteSelectedPratos()');
     this.confirmationService.confirm({
@@ -110,19 +142,11 @@ export class PratosComponent implements OnInit {
             },
             (error) => {
               console.error(error);
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Erro',
-                detail: 'Falha ao deletar prato',
-              });
+              this.showMessage('error', 'Erro', 'Falha ao deletar prato');
             },
           );
         });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Pratos deletados',
-        });
+        this.showMessage('success', 'Sucesso', 'Prato(s) deletado(s).');
       },
     });
   }
@@ -160,11 +184,7 @@ export class PratosComponent implements OnInit {
                 (p) => p.id_prato === prato.id_prato,
               );
               if (pratoIndex > -1) this.pratos[pratoIndex] = { ...prato };
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Sucesso',
-                detail: 'Ingrediente deletado',
-              });
+              this.showMessage('success', 'Sucesso', 'Ingrediente deletado');
             });
         },
       });
@@ -175,9 +195,9 @@ export class PratosComponent implements OnInit {
     this.selectedIngrediente = { ...ingrediente };
     this.selectedPrato = {
       ...prato,
-      nome_prato: prato.nome_prato || '', // Garante que `nome_prato` nunca será undefined
-      link_receita: prato.link_receita || '', // Garante que `link_receita` nunca será undefined
-      ingredientes: prato.ingredientes || [], // Garante que `ingredientes` nunca será undefined
+      nome_prato: prato.nome_prato || '',
+      link_receita: prato.link_receita || '',
+      ingredientes: prato.ingredientes || [],
     };
     this.ingredienteDialog = true;
   }
@@ -191,7 +211,7 @@ export class PratosComponent implements OnInit {
   saveIngrediente() {
     if (!this.selectedIngrediente || !this.selectedPrato) return;
 
-    if (this.selectedIngrediente.id_ingrediente === 0) {
+    if (this.selectedIngrediente.id_ingrediente === undefined) {
       // Adicionando novo ingrediente
       this.pratosService.createIngrediente(this.selectedIngrediente).subscribe(
         (novoIngrediente) => {
@@ -208,22 +228,17 @@ export class PratosComponent implements OnInit {
           if (pratoIndex > -1) {
             this.pratos[pratoIndex] = { ...this.selectedPrato! };
           }
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Ingrediente adicionado com sucesso!',
-          });
+          this.showMessage('success', 'Sucesso', 'Ingrediente adicionado!');
 
           this.hideIngredienteDialog();
         },
         (error) => {
           console.error('Erro ao criar ingrediente:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Falha ao adicionar ingrediente no backend.',
-          });
+          this.showMessage(
+            'error',
+            'Erro',
+            'Falha ao adicionar ingrediente no backend.',
+          );
         },
       );
     } else {
@@ -239,43 +254,32 @@ export class PratosComponent implements OnInit {
               updatedIngrediente;
           }
 
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Ingrediente atualizado com sucesso!',
-          });
+          this.showMessage('success', 'Sucesso', 'Ingrediente atualizado!');
 
           this.hideIngredienteDialog();
         },
         (error) => {
           console.error('Erro ao atualizar ingrediente:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Falha ao atualizar ingrediente no backend.',
-          });
+          this.showMessage(
+            'error',
+            'Erro',
+            'Falha ao atualizar ingrediente no backend.',
+          );
         },
       );
     }
   }
 
-  openAddIngredienteDialog() {
-    if (!this.selectedPrato) {
-      console.error('Nenhum prato selecionado para adicionar ingrediente.');
-      return; // Impede a execução caso selectedPrato seja nulo
-    }
-
-    this.selectedIngrediente = {
-      id_ingrediente: 0,
-      nome_ingrediente: '',
-      id_prato: this.selectedPrato.id_prato, // Associa o ingrediente ao prato selecionado
-    };
+  openAddIngredienteDialog(prato: Prato) {
+    this.selectedPrato = prato;
+    this.selectedIngrediente = this.initializeIngrediente();
+    this.selectedIngrediente.id_prato = prato.id_prato;
 
     if (!this.selectedPrato.ingredientes) {
-      this.selectedPrato.ingredientes = []; // Inicializa o array de ingredientes, se necessário
+      this.selectedPrato.ingredientes = [];
     }
 
-    this.ingredienteDialog = true; // Abre o modal
+    this.ingredienteDialog = true;
     console.log('Dialog de adicionar ingrediente aberto.');
   }
 }
