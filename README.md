@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="/admin-nutricampus/src/assets/nutricampus-logo.png" align="center" width="30%">
+    <img src="/src/assets/nutricampus-logo.png" align="center" width="30%">
 </p>
 <!-- <p align="center"><h1 align="center"></h1></p> -->
 <p align="center">
@@ -44,7 +44,7 @@
 O **Admin NutriCampus** é uma plataforma desenvolvida especialmente para a comunidade da **Universidade Federal de Uberlândia (UFU)**, com foco nos usuários dos Restaurantes Universitários (R.U.s). Seu objetivo é ajudar estudantes, professores e funcionários a gerenciarem de forma prática e eficiente sua alimentação e os nutrientes consumidos no dia a dia na faculdade.
 
 <p align="center">
-    <img src="/admin-nutricampus/src/assets/banner-nutricampus.png" align="center">
+    <img src="/src/assets/banner-nutricampus.png" align="center">
 </p>
 
 ### Principais Funcionalidades
